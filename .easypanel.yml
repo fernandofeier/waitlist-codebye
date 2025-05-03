@@ -1,0 +1,15 @@
+build:
+  type: nixpacks
+  config:
+    nodejs:
+      version: 20
+      buildCommand: npm run build
+      startCommand: node .next/standalone/server.js
+
+deploy:
+  port: 3000
+  healthCheck:
+    path: /
+    timeout: 10s
+    interval: 30s
+    retries: 3
