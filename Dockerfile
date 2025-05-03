@@ -1,45 +1,24 @@
-# Use a versão LTS do Node.js
-FROM node:18-alpine AS base
+FROM node:18-alpine
 
-# Configuração de variáveis de ambiente
-ENV NODE_ENV=production \
-    PORT=3000 \
-    HOSTNAME=0.0.0.0
-
-# Instala dependências apenas para compilação
-FROM base AS deps
 WORKDIR /app
 
-# Copia os arquivos de configuração de dependências
+# Instalar dependências
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Compilação da aplicação
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copiar código fonte
 COPY . .
 
-# Compila a aplicação
+# Construir aplicação
 RUN npm run build
 
-# Imagem de produção
-FROM base AS runner
-WORKDIR /app
+# Configurar ambiente
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-# Cria um usuário não-root para executar a aplicação
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copia os arquivos necessários para produção
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Configura as permissões corretas
-RUN chown -R nextjs:nodejs /app
-USER nextjs
-
+# Expor porta
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Iniciar aplicação
+CMD ["npm", "start"]
