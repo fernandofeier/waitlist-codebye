@@ -1,4 +1,10 @@
+# Use a versão LTS do Node.js
 FROM node:18-alpine AS base
+
+# Configuração de variáveis de ambiente
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
 # Instala dependências apenas para compilação
 FROM base AS deps
@@ -21,21 +27,19 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-
 # Cria um usuário não-root para executar a aplicação
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-USER nextjs
 
 # Copia os arquivos necessários para produção
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-EXPOSE 3000
+# Configura as permissões corretas
+RUN chown -R nextjs:nodejs /app
+USER nextjs
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+EXPOSE 3000
 
 CMD ["node", "server.js"]
