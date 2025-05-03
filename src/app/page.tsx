@@ -1,103 +1,148 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    whatsapp: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  // Função para formatar o número de telefone como (DDD) 99999-9999
+  const formatPhoneNumber = (value: string) => {
+    // Remove todos os caracteres não numéricos
+    const numbers = value.replace(/\D/g, '');
+    
+    // Aplica a formatação
+    if (numbers.length <= 2) {
+      return numbers;
+    } else if (numbers.length <= 7) {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    } else {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+    }
+  };
+
+  // Função para lidar com a mudança no campo de WhatsApp
+  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Remove caracteres não numéricos para validação
+    const numbersOnly = value.replace(/\D/g, '');
+    
+    // Limita a 11 dígitos (DDD + 9 dígitos)
+    if (numbersOnly.length <= 11) {
+      setFormData({
+        ...formData,
+        whatsapp: formatPhoneNumber(numbersOnly)
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+    
+    try {
+      // Preparar os dados para envio (remover formatação do telefone)
+      const whatsappClean = formData.whatsapp.replace(/\D/g, '');
+      
+      const response = await fetch('https://n8n.codebye.com.br/webhook/f41d55b3-e6bd-45b0-bc1c-c0eaa5bbfcc7', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          whatsapp: whatsappClean
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro na requisição: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Verificar se o link foi retornado na resposta
+      if (data && data.link) {
+        // Redirecionar para o link retornado
+        window.location.href = data.link;
+      } else {
+        throw new Error('Link não encontrado na resposta');
+      }
+    } catch (err) {
+      console.error('Erro ao enviar dados:', err);
+      setError('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="container">
+      <div className="card">
+        <div className="content">
+          <div className="logo-container">
+            {/* Substitua "URLDASUALOGO" pela URL da sua logo */}
+            <img src="https://i.ibb.co/JDbyLH9/Design-sem-nome.png" alt="Logo" className="logo" />
+          </div>
+          <h1 className="title">
+            Entre na lista de espera
+          </h1>
+          <p className="description">
+            Faça parte da Comunidade Codebye e tenha acesso a conteúdos exclusivos sobre no-code, aulas práticas e uma rede de profissionais dedicados ao desenvolvimento sem código.
+          </p>
+          
+          <form onSubmit={handleSubmit} className="form">
+            <input
+              type="text"
+              placeholder="Nome completo"
+              required
+              className="input"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <input
+              type="email"
+              placeholder="Seu melhor e-mail"
+              required
+              className="input"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+            />
+            <input
+              type="tel"
+              placeholder="Seu WhatsApp (DDD) 99999-9999"
+              required
+              className="input"
+              value={formData.whatsapp}
+              onChange={handleWhatsAppChange}
+              maxLength={15} // Tamanho máximo para o formato (99) 99999-9999
+              pattern="\([0-9]{2}\)\s[0-9]{5}-?[0-9]{0,4}" // Padrão para validação
+            />
+            <button
+              type="submit"
+              className="button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Enviando...' : 'Entrar na lista de espera'}
+            </button>
+            
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
+          </form>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
