@@ -132,7 +132,10 @@ export default function Home() {
               className="button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Enviando...' : 'Entrar na lista de espera'}
+              <div className="button-content">
+                <img src="/bolt-icon.svg" alt="Raio" className="bolt-icon" />
+                <span>{isSubmitting ? 'Enviando...' : 'Entrar na lista de espera'}</span>
+              </div>
             </button>
             
             {error && (

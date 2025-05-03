@@ -145,7 +145,7 @@ body {
   background: #146EF5;
   border: none;
   border-radius: 8px;
-  color: black;
+  color: #FFFFFF;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
@@ -153,6 +153,19 @@ body {
   margin-top: 0.5rem;
   position: relative;
   overflow: hidden;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.bolt-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
 }
 
 .button::before {
