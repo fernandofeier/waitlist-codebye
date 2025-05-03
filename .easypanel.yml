@@ -1,10 +1,7 @@
 build:
-  type: nixpacks
+  type: dockerfile
   config:
-    nodejs:
-      version: 20
-      buildCommand: npm run build
-      startCommand: node .next/standalone/server.js
+    dockerfile: .easypanel/Dockerfile
 
 deploy:
   port: 3000
