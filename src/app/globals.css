@@ -4,23 +4,31 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   background-color: #111111;
   background-image: 
     radial-gradient(circle at 20% 20%, #222222 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, #222222 0%, transparent 50%);
   color: white;
-  min-height: 100vh;
+  height: 100%;
   font-family: system-ui, -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
   position: relative;
+  flex: 1;
 }
 
 .card {
@@ -213,19 +221,38 @@ body {
 
 @media (max-width: 480px) {
   .card {
-    padding: 2rem;
+    padding: 1.5rem;
+    max-height: 95vh;
+    overflow-y: auto;
+    margin: 0;
+    width: 95%;
   }
   
   .title {
-    font-size: 24px;
+    font-size: 22px;
+    margin-bottom: 0.75rem;
   }
   
   .description {
     font-size: 14px;
+    margin-bottom: 1.5rem;
   }
   
   .input, .button {
     height: 40px;
     font-size: 14px;
+  }
+  
+  .logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .logo-container {
+    margin-bottom: 1rem;
+  }
+  
+  .form {
+    gap: 0.75rem;
   }
 }
